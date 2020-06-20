@@ -13,6 +13,9 @@ const INITIAL_STATE = {
 
 const Board = () => {
   const [grid, setGrid] = useState([[]]);
+  const [nodesVisited, setNodesVisited] = useState(0);
+
+  const TIME_INTERVAL_LENGTH = 85;
 
   useEffect(() => {
     setGrid(getInitialGrid());
@@ -32,56 +35,77 @@ const Board = () => {
       INITIAL_STATE.sourceColumn,
       0,
       NodeState.SOURCE,
-      true
+      true,
+      false
     );
     grid[INITIAL_STATE.targetRow][INITIAL_STATE.targetColumn] = createNode(
       INITIAL_STATE.targetRow,
       INITIAL_STATE.targetColumn,
       Infinity,
       NodeState.TARGET,
+      false,
       false
     );
     return grid;
   };
 
-  const createNode = (row, column, distance, state, isVisited) => {
+  const createNode = (
+    row,
+    column,
+    distance,
+    state,
+    isVisited,
+    isShortestPath
+  ) => {
     return {
       row,
       column,
       distance,
+      distanceToDisplay: distance,
       state,
       isVisited,
-    };
-  };
-
-  const updateNode = (node, distance, state) => {
-    return {
-      ...node,
-      distance,
-      state,
+      isShortestPath,
     };
   };
 
   const dijkstra = () => {
     const visitedNodes = getVisitedNodes(grid);
     console.log(visitedNodes);
-    // const shortestPath = getShortestPath(
-    //   grid[INITIAL_STATE.targetRow][INITIAL_STATE.targetColumn]
-    // );
-    // console.log(shortestPath);
+    const shortestPath = getShortestPath(
+      grid[INITIAL_STATE.targetRow][INITIAL_STATE.targetColumn]
+    );
+    console.log(shortestPath);
 
     visitedNodes.forEach((node, index) => {
-      setTimeout(() => {
-        console.log("mark");
-        const newGrid = grid.slice();
-        const newNode = {
-          ...node,
-          state: NodeState.VISITED,
-        };
-        newGrid[node.row][node.column] = newNode;
-        setGrid(newGrid);
-        // updateNode(item);
-      }, index * 300);
+      // Skipping the first one in order to preserve the style
+      if (index !== 0) {
+        setTimeout(() => {
+          const newGrid = grid.slice();
+          const newNode = {
+            ...node,
+            state: NodeState.VISITED,
+            distanceToDisplay: node.distance,
+          };
+          newGrid[node.row][node.column] = newNode;
+          setGrid(newGrid);
+          setNodesVisited((nodesVisited) => nodesVisited + 1);
+        }, index * TIME_INTERVAL_LENGTH);
+      }
+    });
+
+    shortestPath.forEach((node, index) => {
+      if (index !== 0 && index !== shortestPath.length - 1) {
+        setTimeout(() => {
+          const newGrid = grid.slice();
+          const newNode = {
+            ...node,
+            distanceToDisplay: node.distance,
+            state: NodeState.SHOREST_PATH,
+          };
+          newGrid[node.row][node.column] = newNode;
+          setGrid(newGrid);
+        }, visitedNodes.length * TIME_INTERVAL_LENGTH + index * TIME_INTERVAL_LENGTH);
+      }
     });
   };
 
@@ -98,6 +122,7 @@ const Board = () => {
             </div>
           );
         })}
+        nodes visited: {nodesVisited}
       </Container>
     </>
   );

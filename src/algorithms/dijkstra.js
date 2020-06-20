@@ -92,7 +92,7 @@ export const getShortestPath = (finishNode) => {
   var currentNode = finishNode;
   while (currentNode != null) {
     shortestPath.unshift(currentNode);
-    currentNode.state = NodeState.SHOREST_PATH;
+    //currentNode.state = NodeState.SHOREST_PATH;
     currentNode = currentNode.previousNode;
   }
   return shortestPath;

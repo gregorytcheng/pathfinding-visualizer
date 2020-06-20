@@ -2,10 +2,10 @@ import React from "react";
 import "./Node.css";
 
 const Node = ({ node }) => {
-  const { distance, state } = node;
+  const { distanceToDisplay, state } = node;
   return (
     <div className={`node ${state}`}>
-      {distance === Infinity ? "?" : distance}
+      {distanceToDisplay === Infinity ? "?" : distanceToDisplay}
     </div>
   );
 };
