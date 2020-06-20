@@ -4,5 +4,5 @@ export const NodeState = {
   VISITED: "visited",
   SOURCE: "source",
   TARGET: "target",
-  SHOREST_PATH: "shortest-path",
+  SHORTEST_PATH: "shortest-path",
 };

@@ -14,8 +14,9 @@ const INITIAL_STATE = {
 const Board = () => {
   const [grid, setGrid] = useState([[]]);
   const [nodesVisited, setNodesVisited] = useState(0);
+  const [timeToComplete, setTimeToComplete] = useState(0);
 
-  const TIME_INTERVAL_LENGTH = 85;
+  const TIME_INTERVAL_LENGTH = 65;
 
   useEffect(() => {
     setGrid(getInitialGrid());
@@ -35,28 +36,19 @@ const Board = () => {
       INITIAL_STATE.sourceColumn,
       0,
       NodeState.SOURCE,
-      true,
-      false
+      true
     );
     grid[INITIAL_STATE.targetRow][INITIAL_STATE.targetColumn] = createNode(
       INITIAL_STATE.targetRow,
       INITIAL_STATE.targetColumn,
       Infinity,
       NodeState.TARGET,
-      false,
       false
     );
     return grid;
   };
 
-  const createNode = (
-    row,
-    column,
-    distance,
-    state,
-    isVisited,
-    isShortestPath
-  ) => {
+  const createNode = (row, column, distance, state, isVisited) => {
     return {
       row,
       column,
@@ -64,16 +56,17 @@ const Board = () => {
       distanceToDisplay: distance,
       state,
       isVisited,
-      isShortestPath,
     };
   };
 
   const dijkstra = () => {
+    const timeStart = performance.now();
     const visitedNodes = getVisitedNodes(grid);
-    console.log(visitedNodes);
     const shortestPath = getShortestPath(
       grid[INITIAL_STATE.targetRow][INITIAL_STATE.targetColumn]
     );
+    const timeEnd = performance.now();
+
     console.log(shortestPath);
 
     visitedNodes.forEach((node, index) => {
@@ -100,13 +93,29 @@ const Board = () => {
           const newNode = {
             ...node,
             distanceToDisplay: node.distance,
-            state: NodeState.SHOREST_PATH,
+            state: NodeState.SHORTEST_PATH,
           };
           newGrid[node.row][node.column] = newNode;
           setGrid(newGrid);
         }, visitedNodes.length * TIME_INTERVAL_LENGTH + index * TIME_INTERVAL_LENGTH);
       }
+      if (index === shortestPath.length - 1) {
+        setTimeout(() => {
+          const newGrid = grid.slice();
+          const newNode = {
+            ...node,
+            distanceToDisplay: node.distance,
+          };
+          newGrid[node.row][node.column] = newNode;
+          setGrid(newGrid);
+        }, visitedNodes.length * TIME_INTERVAL_LENGTH + (shortestPath.length - 1) * TIME_INTERVAL_LENGTH);
+      }
     });
+
+    // set time to complete
+    setTimeout(() => {
+      setTimeToComplete(timeEnd - timeStart);
+    }, visitedNodes.length * TIME_INTERVAL_LENGTH + shortestPath.length * TIME_INTERVAL_LENGTH);
   };
 
   return (
@@ -122,7 +131,8 @@ const Board = () => {
             </div>
           );
         })}
-        nodes visited: {nodesVisited}
+        <Header> Nodes visited: {nodesVisited}</Header>
+        <Header> Time to complete: {timeToComplete.toFixed(0)} ms</Header>
       </Container>
     </>
   );
