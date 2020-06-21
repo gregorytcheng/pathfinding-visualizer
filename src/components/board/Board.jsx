@@ -24,11 +24,13 @@ const Board = () => {
     row: INITIAL_STATE.targetRow,
     column: INITIAL_STATE.targetColumn,
   });
+  const [numWalls, setNumWalls] = useState(0);
 
   const TIME_INTERVAL_LENGTH = 100;
 
   useEffect(() => {
     setGrid(getInitialGrid());
+    // eslint-disable-next-line
   }, []);
 
   const getInitialGrid = () => {
@@ -69,13 +71,21 @@ const Board = () => {
   };
 
   const dijkstra = () => {
-    createNewViz(grid);
     const timeStart = performance.now();
     const visitedNodes = getVisitedNodes(grid);
     const shortestPath = getShortestPath(
       grid[currentTarget.row][currentTarget.column]
     );
     const timeEnd = performance.now();
+    setTimeToComplete(timeEnd - timeStart);
+    createNewViz(
+      grid,
+      currentTarget,
+      timeEnd - timeStart,
+      numWalls,
+      visitedNodes.length,
+      shortestPath.length
+    );
 
     visitedNodes.forEach((node, index) => {
       // Skipping the first one in order to preserve the style
@@ -122,7 +132,6 @@ const Board = () => {
 
     // set time to complete
     setTimeout(() => {
-      setTimeToComplete(timeEnd - timeStart);
       setAnimationState(AnimationState.DONE);
     }, visitedNodes.length * TIME_INTERVAL_LENGTH + shortestPath.length * TIME_INTERVAL_LENGTH);
   };
@@ -173,6 +182,7 @@ const Board = () => {
           state: NodeState.EMPTY,
         };
         newGrid[row][column] = newNode;
+        setNumWalls((numWalls) => numWalls - 1);
         setGrid(newGrid);
       }
 
@@ -217,6 +227,7 @@ const Board = () => {
             distanceToDisplay: Infinity,
           };
           newGrid[row][column] = newNode;
+          setNumWalls((numWalls) => numWalls + 1);
           setGrid(newGrid);
         }
       }
