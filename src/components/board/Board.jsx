@@ -19,6 +19,10 @@ const Board = () => {
   const [animationState, setAnimationState] = useState(AnimationState.READY);
   const [sourcePlaced, setSourcePlaced] = useState(true);
   const [targetPlaced, setTargetPlaced] = useState(true);
+  const [currentTarget, setCurrentTarget] = useState({
+    row: INITIAL_STATE.targetRow,
+    column: INITIAL_STATE.targetColumn,
+  });
 
   const TIME_INTERVAL_LENGTH = 65;
 
@@ -68,7 +72,7 @@ const Board = () => {
     const timeStart = performance.now();
     const visitedNodes = getVisitedNodes(grid);
     const shortestPath = getShortestPath(
-      grid[INITIAL_STATE.targetRow][INITIAL_STATE.targetColumn]
+      grid[currentTarget.row][currentTarget.column]
     );
     const timeEnd = performance.now();
 
@@ -199,6 +203,7 @@ const Board = () => {
           newGrid[row][column] = newNode;
           setGrid(newGrid);
           setTargetPlaced(true);
+          setCurrentTarget({ row, column });
         }
 
         // Create a wall if we encounter an empty node
