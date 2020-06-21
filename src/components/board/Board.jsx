@@ -4,6 +4,7 @@ import Node from "../node/Node";
 import { NodeState } from "../../constants/NodeState";
 import { AnimationState } from "../../constants/AnimationState";
 import { getVisitedNodes, getShortestPath } from "../../algorithms/dijkstra";
+import { createNewViz } from "../../services/visualizationService";
 
 const INITIAL_STATE = {
   sourceRow: 14,
@@ -24,7 +25,7 @@ const Board = () => {
     column: INITIAL_STATE.targetColumn,
   });
 
-  const TIME_INTERVAL_LENGTH = 65;
+  const TIME_INTERVAL_LENGTH = 100;
 
   useEffect(() => {
     setGrid(getInitialGrid());
@@ -68,7 +69,7 @@ const Board = () => {
   };
 
   const dijkstra = () => {
-    console.log(grid);
+    createNewViz(grid);
     const timeStart = performance.now();
     const visitedNodes = getVisitedNodes(grid);
     const shortestPath = getShortestPath(
