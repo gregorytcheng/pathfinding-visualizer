@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Container, Button, Header, Portal, Segment } from "semantic-ui-react";
+import {
+  Container,
+  Button,
+  Header,
+  Portal,
+  Segment,
+  List,
+} from "semantic-ui-react";
 import Node from "../node/Node";
 import { NodeState } from "../../constants/NodeState";
 import { AnimationState } from "../../constants/AnimationState";
@@ -8,6 +15,7 @@ import {
   createNewViz,
   getVisualizations,
 } from "../../services/visualizationService";
+import moment from "moment";
 
 const INITIAL_STATE = {
   sourceRow: 14,
@@ -28,7 +36,7 @@ const Board = () => {
     column: INITIAL_STATE.targetColumn,
   });
   const [numWalls, setNumWalls] = useState(0);
-  const [historyPortalOpen, setHistoryPortalOpen] = useState(false);
+  const [history, setHistory] = useState([]);
 
   const TIME_INTERVAL_LENGTH = 100;
 
@@ -239,16 +247,13 @@ const Board = () => {
   };
 
   const handleOpenPortal = () => {
-    setHistoryPortalOpen(true);
     getAllVisualizations();
   };
 
-  const handleClosePortal = () => {
-    setHistoryPortalOpen(false);
-  };
-
   const getAllVisualizations = () => {
-    getVisualizations().then((data) => console.log(data));
+    if (history.length === 0) {
+      getVisualizations().then((data) => setHistory(data.results));
+    }
   };
 
   return (
@@ -279,7 +284,7 @@ const Board = () => {
           </Button>
         }
         onOpen={handleOpenPortal}
-        onClose={handleClosePortal}
+        // onClose={handleClosePortal}
       >
         <Segment
           style={{
@@ -290,8 +295,18 @@ const Board = () => {
           }}
         >
           <Header>History</Header>
-          <p>Portals have tons of great callback functions to hook into.</p>
-          <p>To close, simply click the close button or click away</p>
+          {history.map((viz) => {
+            return (
+              <List key={viz.id}>
+                <List.Item>Walls: {viz.numWalls}</List.Item>
+                <List.Item>
+                  Time to complete: {viz.timeToComplete.toFixed(0)}ms
+                </List.Item>
+                <List.Item>Nodes Visited: {viz.nodesVisited}</List.Item>
+                <List.Item>Created {moment(viz.created).fromNow()}</List.Item>
+              </List>
+            );
+          })}
         </Segment>
       </Portal>
       <Container style={{ paddingTop: "5em" }}>

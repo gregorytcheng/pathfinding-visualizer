@@ -37,7 +37,9 @@ export const createNewViz = (
 
   return axios
     .post(`${endpoint}new-visualization`, request)
-    .then((response) => console.log(response))
+    .then((response) => {
+      return response;
+    })
     .catch((error) => console.log(error));
 };
 
