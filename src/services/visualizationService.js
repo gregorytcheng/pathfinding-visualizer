@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const endpoint = "http://127.0.0.1:5000/";
+const endpoint = "https://pathfinding-visualizer-flask.herokuapp.com/";
 
 export const createNewViz = (
   grid,
