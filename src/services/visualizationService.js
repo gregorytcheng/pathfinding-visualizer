@@ -25,21 +25,29 @@ export const createNewViz = (
     modifiedGrid.push(currentRow);
   }
 
-  try {
-    const request = {
-      grid: modifiedGrid,
-      currentTarget,
-      timeToComplete,
-      numWalls,
-      nodesVisited,
-      shortestPath,
-      created: new Date(),
-    };
+  const request = {
+    grid: modifiedGrid,
+    currentTarget,
+    timeToComplete,
+    numWalls,
+    nodesVisited,
+    shortestPath,
+    created: new Date(),
+  };
 
-    axios
-      .post(`${endpoint}new-visualization`, request)
-      .then((response) => console.log(response));
-  } catch (e) {
-    console.log("big oof");
-  }
+  return axios
+    .post(`${endpoint}new-visualization`, request)
+    .then((response) => console.log(response))
+    .catch((error) => console.log(error));
+};
+
+export const getVisualizations = () => {
+  return axios
+    .get(`${endpoint}visualizations`)
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      return error;
+    });
 };

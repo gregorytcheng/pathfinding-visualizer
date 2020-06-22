@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Container, Button, Header } from "semantic-ui-react";
+import { Container, Button, Header, Portal, Segment } from "semantic-ui-react";
 import Node from "../node/Node";
 import { NodeState } from "../../constants/NodeState";
 import { AnimationState } from "../../constants/AnimationState";
 import { getVisitedNodes, getShortestPath } from "../../algorithms/dijkstra";
-import { createNewViz } from "../../services/visualizationService";
+import {
+  createNewViz,
+  getVisualizations,
+} from "../../services/visualizationService";
 
 const INITIAL_STATE = {
   sourceRow: 14,
@@ -25,6 +28,7 @@ const Board = () => {
     column: INITIAL_STATE.targetColumn,
   });
   const [numWalls, setNumWalls] = useState(0);
+  const [historyPortalOpen, setHistoryPortalOpen] = useState(false);
 
   const TIME_INTERVAL_LENGTH = 100;
 
@@ -234,6 +238,19 @@ const Board = () => {
     }
   };
 
+  const handleOpenPortal = () => {
+    setHistoryPortalOpen(true);
+    getAllVisualizations();
+  };
+
+  const handleClosePortal = () => {
+    setHistoryPortalOpen(false);
+  };
+
+  const getAllVisualizations = () => {
+    getVisualizations().then((data) => console.log(data));
+  };
+
   return (
     <>
       <Button
@@ -253,6 +270,30 @@ const Board = () => {
       >
         Reset
       </Button>
+      <Portal
+        closeOnTriggerClick
+        openOnTriggerClick
+        trigger={
+          <Button disabled={animationState === AnimationState.IN_PROGRESS}>
+            View History
+          </Button>
+        }
+        onOpen={handleOpenPortal}
+        onClose={handleClosePortal}
+      >
+        <Segment
+          style={{
+            left: "40%",
+            position: "fixed",
+            top: "20%",
+            zIndex: 1000,
+          }}
+        >
+          <Header>History</Header>
+          <p>Portals have tons of great callback functions to hook into.</p>
+          <p>To close, simply click the close button or click away</p>
+        </Segment>
+      </Portal>
       <Container style={{ paddingTop: "5em" }}>
         {grid.map((row, rowIndex) => {
           return (
