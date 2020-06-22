@@ -53,3 +53,14 @@ export const getVisualizations = () => {
       return error;
     });
 };
+
+export const getVisualization = (id) => {
+  return axios
+    .get(`${endpoint}restore-visualization/${id}`)
+    .then((response) => {
+      return response.data;
+    })
+    .catch((error) => {
+      return error;
+    });
+};

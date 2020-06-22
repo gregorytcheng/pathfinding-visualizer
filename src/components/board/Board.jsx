@@ -14,6 +14,7 @@ import { getVisitedNodes, getShortestPath } from "../../algorithms/dijkstra";
 import {
   createNewViz,
   getVisualizations,
+  getVisualization,
 } from "../../services/visualizationService";
 import moment from "moment";
 
@@ -256,6 +257,40 @@ const Board = () => {
     }
   };
 
+  const restoreVisualization = (id, numWalls) => {
+    getVisualization(id)
+      .then((response) => {
+        const grid = response.grid;
+        const newGrid = [];
+        for (let row = 0; row < 30; row++) {
+          const currentRow = [];
+          for (let column = 0; column < 45; column++) {
+            currentRow.push({
+              ...grid[row][column],
+              distance:
+                grid[row][column].state === NodeState.SOURCE ? 0 : Infinity,
+              distanceToDisplay:
+                grid[row][column].state === NodeState.SOURCE ? 0 : Infinity,
+              isVisited: false,
+            });
+          }
+          newGrid.push(currentRow);
+        }
+        console.log(response);
+        setGrid(newGrid);
+        setNodesVisited(0);
+        setTimeToComplete(0);
+        setAnimationState(AnimationState.READY);
+        setSourcePlaced(true);
+        setTargetPlaced(true);
+        setCurrentTarget(response.currentTarget);
+        setNumWalls(numWalls);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   return (
     <>
       <Button
@@ -304,6 +339,15 @@ const Board = () => {
                 </List.Item>
                 <List.Item>Nodes Visited: {viz.nodesVisited}</List.Item>
                 <List.Item>Created {moment(viz.created).fromNow()}</List.Item>
+                <List.Item>
+                  <Button
+                    onClick={() => {
+                      restoreVisualization(viz.id, viz.numWalls);
+                    }}
+                  >
+                    Restore
+                  </Button>
+                </List.Item>
               </List>
             );
           })}
