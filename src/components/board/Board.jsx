@@ -33,6 +33,8 @@ const Board = () => {
   const [history, setHistory] = useState([]);
   const [modifiedGrid, setModifiedGrid] = useState(false);
 
+  // Determines milliseconds between steps in the animation. We are intentionally keeping this high, because
+  // repeated re-renders in React can potentially cause issues.
   const TIME_INTERVAL_LENGTH = 100;
 
   useEffect(() => {
@@ -321,7 +323,7 @@ const Board = () => {
         onClick={() => {
           reset();
         }}
-        disabled={animationState !== AnimationState.DONE}
+        disabled={animationState === AnimationState.IN_PROGRESS}
       >
         Reset
       </Button>
