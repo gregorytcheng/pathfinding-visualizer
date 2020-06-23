@@ -7,16 +7,12 @@ import {
   Button,
   Loader,
 } from "semantic-ui-react";
-import { AnimationState } from "../../constants/AnimationState";
 import moment from "moment";
+import { getVisualizations } from "../../services/visualizationService";
 
-const HistoryPortal = ({
-  animationState,
-  getAllVisualizations,
-  history,
-  restoreVisualization,
-}) => {
+const HistoryPortal = ({ disabled, restoreVisualization }) => {
   const [portalOpen, setPortalOpen] = useState(false);
+  const [history, setHistory] = useState([]);
 
   const handleOpenPortal = () => {
     setPortalOpen(true);
@@ -27,15 +23,17 @@ const HistoryPortal = ({
     setPortalOpen(false);
   };
 
+  const getAllVisualizations = () => {
+    if (history.length === 0) {
+      getVisualizations().then((data) => setHistory(data.results));
+    }
+  };
+
   return (
     <Portal
       closeOnTriggerClick
       openOnTriggerClick
-      trigger={
-        <Button disabled={animationState === AnimationState.IN_PROGRESS}>
-          View History
-        </Button>
-      }
+      trigger={<Button disabled={disabled}>View History</Button>}
       open={portalOpen}
       onOpen={handleOpenPortal}
       onClose={handleClosePortal}

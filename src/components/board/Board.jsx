@@ -6,7 +6,6 @@ import { AnimationState } from "../../constants/AnimationState";
 import { getVisitedNodes, getShortestPath } from "../../algorithms/dijkstra";
 import {
   createNewViz,
-  getVisualizations,
   getVisualization,
 } from "../../services/visualizationService";
 import HistoryPortal from "./../history/historyPortal";
@@ -30,7 +29,6 @@ const Board = () => {
     column: INITIAL_STATE.targetColumn,
   });
   const [numWalls, setNumWalls] = useState(0);
-  const [history, setHistory] = useState([]);
   const [modifiedGrid, setModifiedGrid] = useState(false);
 
   // Determines milliseconds between steps in the animation. We are intentionally keeping this high, because
@@ -262,12 +260,6 @@ const Board = () => {
     }
   };
 
-  const getAllVisualizations = () => {
-    if (history.length === 0) {
-      getVisualizations().then((data) => setHistory(data.results));
-    }
-  };
-
   const restoreVisualization = (id, numWalls) => {
     getVisualization(id)
       .then((response) => {
@@ -328,10 +320,8 @@ const Board = () => {
         Reset
       </Button>
       <HistoryPortal
-        animationState={animationState}
-        history={history}
+        disabled={animationState === AnimationState.IN_PROGRESS}
         restoreVisualization={restoreVisualization}
-        getAllVisualizations={getAllVisualizations}
       />
       <Container style={{ paddingTop: "5em" }}>
         {grid.map((row, rowIndex) => {
