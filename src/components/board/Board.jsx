@@ -38,6 +38,7 @@ const Board = () => {
   });
   const [numWalls, setNumWalls] = useState(0);
   const [history, setHistory] = useState([]);
+  const [portalOpen, setPortalOpen] = useState(false);
 
   const TIME_INTERVAL_LENGTH = 100;
 
@@ -248,7 +249,12 @@ const Board = () => {
   };
 
   const handleOpenPortal = () => {
+    setPortalOpen(true);
     getAllVisualizations();
+  };
+
+  const handleClosePortal = () => {
+    setPortalOpen(false);
   };
 
   const getAllVisualizations = () => {
@@ -318,39 +324,47 @@ const Board = () => {
             View History
           </Button>
         }
+        open={portalOpen}
         onOpen={handleOpenPortal}
-        // onClose={handleClosePortal}
+        onClose={handleClosePortal}
       >
         <Segment
           style={{
-            left: "40%",
+            left: "45%",
             position: "fixed",
             top: "20%",
             zIndex: 1000,
           }}
         >
           <Header>History</Header>
-          {history.map((viz) => {
-            return (
-              <List key={viz.id}>
-                <List.Item>Walls: {viz.numWalls}</List.Item>
-                <List.Item>
-                  Time to complete: {viz.timeToComplete.toFixed(0)}ms
-                </List.Item>
-                <List.Item>Nodes Visited: {viz.nodesVisited}</List.Item>
-                <List.Item>Created {moment(viz.created).fromNow()}</List.Item>
-                <List.Item>
-                  <Button
-                    onClick={() => {
-                      restoreVisualization(viz.id, viz.numWalls);
-                    }}
-                  >
-                    Restore
-                  </Button>
-                </List.Item>
-              </List>
-            );
-          })}
+          <div style={{ overflow: "scroll", height: "500px" }}>
+            <List style={{ margin: "1em" }}>
+              {history.map((viz) => {
+                return (
+                  <div key={viz.id} style={{ margin: "1em" }}>
+                    <List.Item>Walls: {viz.numWalls}</List.Item>
+                    <List.Item>
+                      Time to complete: {viz.timeToComplete.toFixed(0)}ms
+                    </List.Item>
+                    <List.Item>Nodes Visited: {viz.nodesVisited}</List.Item>
+                    <List.Item>
+                      Created {moment(viz.created).fromNow()}
+                    </List.Item>
+                    <List.Item>
+                      <Button
+                        onClick={() => {
+                          restoreVisualization(viz.id, viz.numWalls);
+                          handleClosePortal();
+                        }}
+                      >
+                        Restore
+                      </Button>
+                    </List.Item>
+                  </div>
+                );
+              })}
+            </List>
+          </div>
         </Segment>
       </Portal>
       <Container style={{ paddingTop: "5em" }}>
