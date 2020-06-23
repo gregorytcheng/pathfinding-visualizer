@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Container,
-  Button,
-  Header,
-  Portal,
-  Segment,
-  List,
-} from "semantic-ui-react";
+import { Container, Button, Header } from "semantic-ui-react";
 import Node from "../node/Node";
 import { NodeState } from "../../constants/NodeState";
 import { AnimationState } from "../../constants/AnimationState";
@@ -16,7 +9,7 @@ import {
   getVisualizations,
   getVisualization,
 } from "../../services/visualizationService";
-import moment from "moment";
+import HistoryPortal from "./../history/historyPortal";
 
 const INITIAL_STATE = {
   sourceRow: 14,
@@ -38,7 +31,6 @@ const Board = () => {
   });
   const [numWalls, setNumWalls] = useState(0);
   const [history, setHistory] = useState([]);
-  const [portalOpen, setPortalOpen] = useState(false);
   const [modifiedGrid, setModifiedGrid] = useState(false);
 
   const TIME_INTERVAL_LENGTH = 100;
@@ -48,6 +40,7 @@ const Board = () => {
     // eslint-disable-next-line
   }, []);
 
+  // Generates the initial grid
   const getInitialGrid = () => {
     const grid = [];
     for (let row = 0; row < 30; row++) {
@@ -74,6 +67,7 @@ const Board = () => {
     return grid;
   };
 
+  // Creates a node given parameters
   const createNode = (row, column, distance, state, isVisited) => {
     return {
       row,
@@ -85,6 +79,7 @@ const Board = () => {
     };
   };
 
+  // Performs the Dijkstra algorithm and animates the nodes visited and shortest path subsequently.
   const dijkstra = () => {
     const timeStart = performance.now();
     const visitedNodes = getVisitedNodes(grid);
@@ -154,13 +149,24 @@ const Board = () => {
     }, visitedNodes.length * TIME_INTERVAL_LENGTH + shortestPath.length * TIME_INTERVAL_LENGTH);
   };
 
+  // Resets the grid to its initial state. Should only be called
+  // when the animation state is ready or complete.
   const reset = () => {
+    // Protection against errors
+    if (animationState === AnimationState.IN_PROGRESS) {
+      return;
+    }
     setGrid(getInitialGrid());
     setAnimationState(AnimationState.READY);
     setNodesVisited(0);
     setTimeToComplete(0);
+    setCurrentTarget({
+      row: INITIAL_STATE.targetRow,
+      column: INITIAL_STATE.targetColumn,
+    });
   };
 
+  // Handles a single click on a cell with the board.
   const handleClick = (row, column) => {
     setModifiedGrid(true);
 
@@ -254,15 +260,6 @@ const Board = () => {
     }
   };
 
-  const handleOpenPortal = () => {
-    setPortalOpen(true);
-    getAllVisualizations();
-  };
-
-  const handleClosePortal = () => {
-    setPortalOpen(false);
-  };
-
   const getAllVisualizations = () => {
     if (history.length === 0) {
       getVisualizations().then((data) => setHistory(data.results));
@@ -328,57 +325,12 @@ const Board = () => {
       >
         Reset
       </Button>
-      <Portal
-        closeOnTriggerClick
-        openOnTriggerClick
-        trigger={
-          <Button disabled={animationState === AnimationState.IN_PROGRESS}>
-            View History
-          </Button>
-        }
-        open={portalOpen}
-        onOpen={handleOpenPortal}
-        onClose={handleClosePortal}
-      >
-        <Segment
-          style={{
-            left: "45%",
-            position: "fixed",
-            top: "20%",
-            zIndex: 1000,
-          }}
-        >
-          <Header>History</Header>
-          <div style={{ overflow: "scroll", height: "500px" }}>
-            <List style={{ margin: "1em" }}>
-              {history.map((viz) => {
-                return (
-                  <div key={viz.id} style={{ margin: "1em" }}>
-                    <List.Item>Walls: {viz.numWalls}</List.Item>
-                    <List.Item>
-                      Time to complete: {viz.timeToComplete.toFixed(0)}ms
-                    </List.Item>
-                    <List.Item>Nodes Visited: {viz.nodesVisited}</List.Item>
-                    <List.Item>
-                      Created {moment(viz.created).fromNow()}
-                    </List.Item>
-                    <List.Item>
-                      <Button
-                        onClick={() => {
-                          restoreVisualization(viz.id, viz.numWalls);
-                          handleClosePortal();
-                        }}
-                      >
-                        Restore
-                      </Button>
-                    </List.Item>
-                  </div>
-                );
-              })}
-            </List>
-          </div>
-        </Segment>
-      </Portal>
+      <HistoryPortal
+        animationState={animationState}
+        history={history}
+        restoreVisualization={restoreVisualization}
+        getAllVisualizations={getAllVisualizations}
+      />
       <Container style={{ paddingTop: "5em" }}>
         {grid.map((row, rowIndex) => {
           return (
