@@ -39,6 +39,7 @@ const Board = () => {
   const [numWalls, setNumWalls] = useState(0);
   const [history, setHistory] = useState([]);
   const [portalOpen, setPortalOpen] = useState(false);
+  const [modifiedGrid, setModifiedGrid] = useState(false);
 
   const TIME_INTERVAL_LENGTH = 100;
 
@@ -92,14 +93,17 @@ const Board = () => {
     );
     const timeEnd = performance.now();
     setTimeToComplete(timeEnd - timeStart);
-    createNewViz(
-      grid,
-      currentTarget,
-      timeEnd - timeStart,
-      numWalls,
-      visitedNodes.length,
-      shortestPath.length
-    );
+
+    if (modifiedGrid) {
+      createNewViz(
+        grid,
+        currentTarget,
+        timeEnd - timeStart,
+        numWalls,
+        visitedNodes.length,
+        shortestPath.length
+      );
+    }
 
     visitedNodes.forEach((node, index) => {
       // Skipping the first one in order to preserve the style
@@ -158,6 +162,8 @@ const Board = () => {
   };
 
   const handleClick = (row, column) => {
+    setModifiedGrid(true);
+
     // Only handle changes if a visualization is not running
     if (animationState === AnimationState.READY) {
       // If clicking on a source to remove
@@ -282,7 +288,6 @@ const Board = () => {
           }
           newGrid.push(currentRow);
         }
-        console.log(response);
         setGrid(newGrid);
         setNodesVisited(0);
         setTimeToComplete(0);
@@ -290,7 +295,9 @@ const Board = () => {
         setSourcePlaced(true);
         setTargetPlaced(true);
         setCurrentTarget(response.currentTarget);
+        //TODO find a better way to do this. Setting numWalls from the request feels redundant.
         setNumWalls(numWalls);
+        setModifiedGrid(false);
       })
       .catch((error) => {
         console.log(error);
@@ -301,6 +308,11 @@ const Board = () => {
     <>
       <Button
         onClick={() => {
+          // TODO refactor this
+          if (!sourcePlaced || !targetPlaced) {
+            alert("Please place both a source and a target before proceeding.");
+            return;
+          }
           setAnimationState(AnimationState.IN_PROGRESS);
           dijkstra();
         }}
