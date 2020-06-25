@@ -9,13 +9,11 @@ import {
   getVisualization,
 } from "../../services/visualizationService";
 import HistoryPortal from "./../history/historyPortal";
-
-const INITIAL_STATE = {
-  sourceRow: 14,
-  sourceColumn: 5,
-  targetRow: 14,
-  targetColumn: 40,
-};
+import {
+  getInitialGrid,
+  INITIAL_STATE,
+  getRandomGrid,
+} from "../../utils/boardUtils";
 
 const Board = () => {
   const [grid, setGrid] = useState([[]]);
@@ -39,45 +37,6 @@ const Board = () => {
     setGrid(getInitialGrid());
     // eslint-disable-next-line
   }, []);
-
-  // Generates the initial grid
-  const getInitialGrid = () => {
-    const grid = [];
-    for (let row = 0; row < 30; row++) {
-      const currentRow = [];
-      for (let column = 0; column < 45; column++) {
-        currentRow.push(createNode(row, column, Infinity, NodeState.EMPTY));
-      }
-      grid.push(currentRow);
-    }
-    grid[INITIAL_STATE.sourceRow][INITIAL_STATE.sourceColumn] = createNode(
-      INITIAL_STATE.sourceRow,
-      INITIAL_STATE.sourceColumn,
-      0,
-      NodeState.SOURCE,
-      true
-    );
-    grid[INITIAL_STATE.targetRow][INITIAL_STATE.targetColumn] = createNode(
-      INITIAL_STATE.targetRow,
-      INITIAL_STATE.targetColumn,
-      Infinity,
-      NodeState.TARGET,
-      false
-    );
-    return grid;
-  };
-
-  // Creates a node given parameters
-  const createNode = (row, column, distance, state, isVisited) => {
-    return {
-      row,
-      column,
-      distance,
-      distanceToDisplay: distance,
-      state,
-      isVisited,
-    };
-  };
 
   // Performs the Dijkstra algorithm and animates the nodes visited and shortest path subsequently.
   const dijkstra = () => {
@@ -164,6 +123,7 @@ const Board = () => {
       row: INITIAL_STATE.targetRow,
       column: INITIAL_STATE.targetColumn,
     });
+    setNumWalls(0);
   };
 
   // Handles a single click on a cell with the board.
@@ -295,6 +255,18 @@ const Board = () => {
       });
   };
 
+  // Generates a random grid for an interesting animation.
+  // We will first place walls on approximately half of the nodes, and then set a source and target.
+  const generateRandomGrid = () => {
+    const newGridInfo = getRandomGrid();
+    setGrid(newGridInfo.grid);
+    setNumWalls(newGridInfo.numWalls);
+    setSourcePlaced(true);
+    setTargetPlaced(true);
+    setCurrentTarget(newGridInfo.currentTarget);
+    setModifiedGrid(true);
+  };
+
   return (
     <>
       <Button
@@ -323,6 +295,12 @@ const Board = () => {
         disabled={animationState === AnimationState.IN_PROGRESS}
         restoreVisualization={restoreVisualization}
       />
+      <Button
+        onClick={generateRandomGrid}
+        disabled={animationState === AnimationState.IN_PROGRESS}
+      >
+        Random Grid
+      </Button>
       <Container style={{ paddingTop: "5em" }}>
         {grid.map((row, rowIndex) => {
           return (
